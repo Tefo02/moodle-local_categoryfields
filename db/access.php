@@ -15,18 +15,21 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Custom installation code for the plugin.
+ * Defines the capabilities used by the plugin.
  *
  * @package     local_categoryfields
- * @category    upgrade
  * @copyright   2025 Stefano Lopes <stefanolopes84@gmail.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * Custom code to be run on installing the plugin.
- */
-function xmldb_local_categoryfields_install(): bool {
+defined('MOODLE_INTERNAL') || die();
 
-    return true;
-}
+$capabilities = [
+    'local/categoryfields:manage' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+];
