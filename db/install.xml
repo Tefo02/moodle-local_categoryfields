@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/categoryfields/db" VERSION="2025091605" COMMENT="Defines the database tables for the local_categoryfields plugin.">
+<XMLDB PATH="local/categoryfields/db" VERSION="2025091701" COMMENT="Defines database table for local_categoryfields.">
   <TABLES>
     <TABLE NAME="local_categoryfields_data" COMMENT="Stores extra data for course categories.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="categoryid" TYPE="int" LENGTH="10" NOTNULL="true" UNIQUE="true" COMMENT="Foreign key to the course_categories table."/>
-        <FIELD NAME="summary" TYPE="text" NOTNULL="false" COMMENT="Rich text summary for the category card."/>
-        <FIELD NAME="imageurl" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="URL for the category card image."/>
+        <FIELD NAME="categoryid" TYPE="int" LENGTH="10" NOTNULL="true" UNIQUE="true"/>
+        <FIELD NAME="summary" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="imageurl" TYPE="char" LENGTH="255" NOTNULL="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

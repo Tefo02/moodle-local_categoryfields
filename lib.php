@@ -14,22 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * Defines the capabilities used by the plugin.
- *
- * @package     local_categoryfields
- * @copyright   2025 Stefano Lopes <stefanolopes84@gmail.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = [
-    'local/categoryfields:manage' => [
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => [
-            'manager' => CAP_ALLOW
-        ],
-    ],
-];
+function local_categoryfields_extend_navigation_category_settings(navigation_node $parentnode, context_coursecat $context) {
+    global $PAGE;
+
+    // só para quem pode gerir categorias
+    if (!has_capability('moodle/category:manage', $context)) {
+        return;
+    }
+    $categoryid = $context->instanceid;
+    $url = new moodle_url('/local/categoryfields/edit.php', ['categoryid' => $categoryid]);
+    $parentnode->add(
+        get_string('pluginname', 'local_categoryfields'),
+        $url,
+        navigation_node::NODETYPE_LEAF,
+        null,
+        'local_categoryfields',
+        new pix_icon('i/settings', '')
+    );
+}
