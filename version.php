@@ -25,7 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_categoryfields';
-$plugin->release = '0.1.0';
-$plugin->version = 2025091600;
-$plugin->requires = 2022112800;
-$plugin->maturity = MATURITY_ALPHA;
+$plugin->release   = 'v1.0.0-alpha';
+$plugin->version   = 2025091605;
+$plugin->requires  = 2022112805;
+$plugin->maturity  = MATURITY_ALPHA;
+$plugin->frankenstyle = true;

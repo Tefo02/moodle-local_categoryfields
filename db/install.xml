@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/categoryfields/db" VERSION="2025091600" COMMENT="Defines the database tables for the local_categoryfields plugin.">
+<XMLDB PATH="local/categoryfields/db" VERSION="2025091605" COMMENT="Defines the database tables for the local_categoryfields plugin.">
   <TABLES>
     <TABLE NAME="local_categoryfields_data" COMMENT="Stores extra data for course categories.">
       <FIELDS>
