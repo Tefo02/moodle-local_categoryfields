@@ -5,8 +5,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="categoryid" TYPE="int" LENGTH="10" NOTNULL="true" UNIQUE="true"/>
-        <FIELD NAME="summary" TYPE="text" NOTNULL="false"/>
-        <FIELD NAME="imageurl" TYPE="char" LENGTH="255" NOTNULL="false"/>
+        <FIELD NAME="image" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="The itemid for the category image file."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

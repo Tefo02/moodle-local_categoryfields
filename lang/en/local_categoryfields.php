@@ -25,7 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['changessaved'] = 'Changes saved';
 $string['extradata'] = 'Card display fields';
+$string['image'] = 'Image';
 $string['imageurl'] = 'Image URL';
 $string['pluginname'] = 'Category Fields';
-$string['summary'] = 'Summary';

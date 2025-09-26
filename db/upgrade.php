@@ -18,25 +18,39 @@ defined('MOODLE_INTERNAL') || die();
 
 function xmldb_local_categoryfields_upgrade($oldversion) {
     global $DB;
-
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2025091701) {
+    if ($oldversion < 2025092400) {
+        // 1. Define a nova coluna para o itemid do arquivo.
         $table = new xmldb_table('local_categoryfields_data');
+        $field = new xmldb_field('image', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, false, '0', 'summary');
 
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('categoryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('summary', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('imageurl', XMLDB_TYPE_CHAR, '255', null, null, null, null);
-
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
-        $table->add_key('categoryid_uk', XMLDB_KEY_UNIQUE, ['categoryid']);
-
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
+        // 2. Adiciona a nova coluna.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
         }
 
-        upgrade_plugin_savepoint(true, 2025091701, 'local', 'categoryfields');
+        // 3. Define a coluna antiga que será removida.
+        $fieldtodrop = new xmldb_field('imageurl');
+
+        // 4. Remove a coluna antiga.
+        if ($dbman->field_exists($table, $fieldtodrop)) {
+            $dbman->drop_field($table, $fieldtodrop);
+        }
+
+        // Ponto de salvamento da atualização.
+        upgrade_plugin_savepoint(true, 2025092400, 'local', 'categoryfields');
+    }
+
+    if ($oldversion < 2025092401) {
+        $table = new xmldb_table('local_categoryfields_data');
+        $field = new xmldb_field('summary');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2025092401, 'local', 'categoryfields');
     }
 
     return true;

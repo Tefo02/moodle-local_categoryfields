@@ -18,44 +18,62 @@ require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/local/categoryfields/classes/form/edit_category_fields_form.php');
 
 $categoryid = required_param('categoryid', PARAM_INT);
+$category = \core_course_category::get($categoryid, MUST_EXIST);
 $context = context_coursecat::instance($categoryid);
-require_login();
-$PAGE->set_context(context_system::instance());
 
+require_login();
 require_capability('moodle/category:manage', $context);
 
 $PAGE->set_url(new moodle_url('/local/categoryfields/edit.php', ['categoryid' => $categoryid]));
+$PAGE->set_context($context);
 $PAGE->set_title(get_string('pluginname', 'local_categoryfields'));
 $PAGE->set_heading(get_string('pluginname', 'local_categoryfields'));
 
-$mform = new \local_categoryfields\form\edit_category_fields_form(null, ['categoryid' => $categoryid]);
-
-global $DB;
-if ($record = $DB->get_record('local_categoryfields_data', ['categoryid' => $categoryid])) {
-    $formdata = new stdClass();
-    $formdata->id = $record->id;
-    $formdata->summary = $record->summary;
-    $formdata->imageurl = $record->imageurl;
-    $mform->set_data($formdata);
+// Prepara os dados para o filemanager.
+$draftitemid = file_get_submitted_draft_itemid('image_manager');
+$record = $DB->get_record('local_categoryfields_data', ['categoryid' => $categoryid], '*', IGNORE_MISSING);
+if ($record) {
+    file_prepare_draft_area($draftitemid, $context->id, 'local_categoryfields', 'category_image', $record->id, ['subdirs' => 0, 'maxfiles' => 1]);
 }
 
+$formdata = new stdClass();
+if ($record) {
+    $formdata->id = $record->id;
+}
+$formdata->image_manager = $draftitemid; // Define o itemid do rascunho para o formulário.
+
+$mform = new \local_categoryfields\form\edit_category_fields_form(null, ['categoryid' => $categoryid]);
+$mform->set_data($formdata);
+
+
 if ($mform->is_cancelled()) {
-    redirect(new moodle_url('/course/management.php', ['category' => $categoryid]));
+    redirect(new moodle_url('/course/management.php', ['categoryid' => $categoryid]));
 } else if ($data = $mform->get_data()) {
-    $rec = (object)[
-        'categoryid' => $categoryid,
-        'summary'    => $data->summary,
-        'imageurl'   => $data->imageurl,
-    ];
-    if (!empty($data->id)) {
-        $rec->id = $data->id;
+    $rec = new stdClass();
+    $rec->categoryid = $categoryid;
+
+    if ($record) {
+        $rec->id = $record->id;
         $DB->update_record('local_categoryfields_data', $rec);
+        $itemid = $record->id;
     } else {
-        $DB->insert_record('local_categoryfields_data', $rec);
+        $itemid = $DB->insert_record('local_categoryfields_data', $rec);
     }
-    redirect(new moodle_url('/course/management.php', ['category' => $categoryid]), get_string('changessaved', 'local_categoryfields'));
+
+    // Salva o arquivo da área de rascunho para a área de arquivos permanente do plugin.
+    file_save_draft_area_files(
+        $data->image_manager,
+        $context->id,
+        'local_categoryfields',
+        'category_image',
+        $itemid,
+        ['subdirs' => 0, 'maxfiles' => 1]
+    );
+
+    redirect(new moodle_url('/course/management.php', ['categoryid' => $categoryid]), get_string('changessaved', 'local_categoryfields'), \core\output\notification::NOTIFY_SUCCESS);
 }
 
 echo $OUTPUT->header();
+echo $OUTPUT->heading($category->name);
 $mform->display();
 echo $OUTPUT->footer();

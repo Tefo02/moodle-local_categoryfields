@@ -22,22 +22,20 @@ require_once($CFG->libdir . '/formslib.php');
 class edit_category_fields_form extends \moodleform {
     public function definition() {
         $mform = $this->_form;
-        $categoryid = $this->_customdata['categoryid'] ?? 0;
+
+        $categoryid = $this->_customdata['categoryid'];
 
         $mform->addElement('header', 'local_categoryfields_header', get_string('extradata', 'local_categoryfields'));
-        $mform->addElement(
-            'textarea',
-            'summary',
-            get_string('summary', 'local_categoryfields'),
-            'wrap="virtual" rows="8" cols="60"'
-        );
-        $mform->setType('summary', PARAM_RAW);
-        $mform->addElement('text', 'imageurl', get_string('imageurl', 'local_categoryfields'), ['size' => '50']);
-        $mform->setType('imageurl', PARAM_URL);
 
-        $mform->addElement('hidden', 'id'); // id do registro local_categoryfields_data (se houver)
-        $mform->setType('id', PARAM_INT);
-        $mform->addElement('hidden', 'categoryid', $categoryid);
+        $mform->addElement(
+            'filemanager',
+            'image_manager',
+            get_string('image', 'local_categoryfields'),
+            null,
+            ['maxfiles' => 1, 'accepted_types' => ['image/png', 'image/jpeg', 'image/gif']]
+        );
+
+         $mform->addElement('hidden', 'categoryid', $categoryid);
         $mform->setType('categoryid', PARAM_INT);
 
         $this->add_action_buttons();
