@@ -19,14 +19,31 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
 
+
 class edit_category_fields_form extends \moodleform {
     public function definition() {
         $mform = $this->_form;
-
         $categoryid = $this->_customdata['categoryid'];
 
-        $mform->addElement('header', 'local_categoryfields_header', get_string('extradata', 'local_categoryfields'));
+        $currentcategory = \core_course_category::get($categoryid);
+        if (!$currentcategory) {
+            return;
+        }
 
+            $excludelist = [];
+            $excludelist[] = $categoryid;
+            $excludelist = array_merge($excludelist, $currentcategory->get_parents());
+
+            $childobjects = $currentcategory->get_children();
+
+            $childids = array_column($childobjects, 'id');
+
+            $descendantids = \local_categoryfields_get_all_descendant_ids($currentcategory);
+            $excludelist = array_merge($excludelist, $descendantids);
+
+            $excludelist = array_unique($excludelist);
+
+        $mform->addElement('header', 'local_categoryfields_header', get_string('extradata', 'local_categoryfields'));
         $mform->addElement(
             'filemanager',
             'image_manager',
@@ -35,7 +52,24 @@ class edit_category_fields_form extends \moodleform {
             ['maxfiles' => 1, 'accepted_types' => ['image/png', 'image/jpeg', 'image/gif']]
         );
 
-         $mform->addElement('hidden', 'categoryid', $categoryid);
+        $categories = \core_course_category::get_all();
+        $categoryoptions = [];
+        foreach ($categories as $cat) {
+            if (!in_array($cat->id, $excludelist)) {
+                $categoryoptions[$cat->id] = \local_categoryfields_get_category_path_name($cat);
+            }
+        }
+
+        $mform->addElement(
+            'select',
+            'related_categories',
+            get_string('relatedcategories', 'local_categoryfields'),
+            $categoryoptions,
+            ['multiple' => true]
+        );
+        $mform->setType('related_categories', PARAM_RAW);
+
+        $mform->addElement('hidden', 'categoryid', $categoryid);
         $mform->setType('categoryid', PARAM_INT);
 
         $this->add_action_buttons();

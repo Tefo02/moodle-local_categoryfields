@@ -15,7 +15,11 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 require_once(__DIR__ . '/../../config.php');
-require_once($CFG->dirroot . '/local/categoryfields/classes/form/edit_category_fields_form.php');
+
+require_once($CFG->libdir . '/formslib.php');
+
+require_once(__DIR__ . '/lib.php');
+require_once(__DIR__ . '/classes/form/edit_category_fields_form.php');
 
 $categoryid = required_param('categoryid', PARAM_INT);
 $category = \core_course_category::get($categoryid, MUST_EXIST);
@@ -29,7 +33,6 @@ $PAGE->set_context($context);
 $PAGE->set_title(get_string('pluginname', 'local_categoryfields'));
 $PAGE->set_heading(get_string('pluginname', 'local_categoryfields'));
 
-// Prepara os dados para o filemanager.
 $draftitemid = file_get_submitted_draft_itemid('image_manager');
 $record = $DB->get_record('local_categoryfields_data', ['categoryid' => $categoryid], '*', IGNORE_MISSING);
 if ($record) {
@@ -39,8 +42,9 @@ if ($record) {
 $formdata = new stdClass();
 if ($record) {
     $formdata->id = $record->id;
+    $formdata->related_categories = !empty($record->related_categories) ? explode(',', $record->related_categories) : [];
 }
-$formdata->image_manager = $draftitemid; // Define o itemid do rascunho para o formulário.
+$formdata->image_manager = $draftitemid;
 
 $mform = new \local_categoryfields\form\edit_category_fields_form(null, ['categoryid' => $categoryid]);
 $mform->set_data($formdata);
@@ -51,6 +55,7 @@ if ($mform->is_cancelled()) {
 } else if ($data = $mform->get_data()) {
     $rec = new stdClass();
     $rec->categoryid = $categoryid;
+    $rec->related_categories = !empty($data->related_categories) ? implode(',', $data->related_categories) : '';
 
     if ($record) {
         $rec->id = $record->id;
@@ -60,7 +65,6 @@ if ($mform->is_cancelled()) {
         $itemid = $DB->insert_record('local_categoryfields_data', $rec);
     }
 
-    // Salva o arquivo da área de rascunho para a área de arquivos permanente do plugin.
     file_save_draft_area_files(
         $data->image_manager,
         $context->id,

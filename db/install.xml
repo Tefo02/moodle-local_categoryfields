@@ -6,6 +6,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="categoryid" TYPE="int" LENGTH="10" NOTNULL="true" UNIQUE="true"/>
         <FIELD NAME="image" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="The itemid for the category image file."/>
+        <FIELD NAME="related_categories" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" COMMENT="Comma-separated list of related category IDs."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

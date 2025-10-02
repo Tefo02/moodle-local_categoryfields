@@ -16,9 +16,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-function local_categoryfields_extend_navigation_category_settings(navigation_node $parentnode, context_coursecat $context) {
-    global $PAGE;
+require_once($CFG->libdir . '/formslib.php');
 
+require_once(__DIR__ . '/lib.php');
+require_once(__DIR__ . '/classes/form/edit_category_fields_form.php');
+
+function local_categoryfields_extend_navigation_category_settings(navigation_node $parentnode, context_coursecat $context) {
     if (!has_capability('moodle/category:manage', $context)) {
         return;
     }
@@ -72,4 +75,87 @@ function local_categoryfields_pluginfile($course, $cm, $context, $filearea, $arg
     }
 
     send_stored_file($file, 0, 0, $forcedownload, $options);
+}
+
+
+/**
+ * Returns an array of related categories for a given category ID.
+ *
+ * @param int $categoryid The ID of the category.
+ * @return array An array of \core_course_category objects.
+ * @package local_categoryfields
+ */
+function local_categoryfields_get_related_categories(int $categoryid): array {
+    global $DB;
+
+    $record = $DB->get_record(
+        'local_categoryfields_data',
+        ['categoryid' => $categoryid],
+        'related_categories',
+        IGNORE_MISSING
+    );
+
+    if (!$record || empty($record->related_categories)) {
+        return [];
+    }
+
+    $relatedcategoryids = explode(',', $record->related_categories);
+    $relatedcategories = [];
+
+    foreach ($relatedcategoryids as $id) {
+        $cat = \core_course_category::get((int)$id, IGNORE_MISSING);
+        if ($cat && $cat->is_uservisible()) {
+            $cat->full_path = $cat->get_formatted_name();
+            $relatedcategories[] = $cat;
+        }
+    }
+
+    return $relatedcategories;
+}
+
+/**
+ * Retorna um array com os IDs de TODOS os descendentes de uma categoria (filhos, netos, etc.).
+ * Esta função é recursiva por natureza, mas implementada de forma iterativa para performance.
+ *
+ * @param \core_course_category $category A categoria raiz da qual buscar os descendentes.
+ * @return array Um array plano com todos os IDs dos descendentes.
+ * @package local_categoryfields
+ */
+function local_categoryfields_get_all_descendant_ids(\core_course_category $category): array {
+    $descendantids = [];
+    $queue = $category->get_children();
+    while (!empty($queue)) {
+        $currentcat = array_shift($queue);
+        $descendantids[] = $currentcat->id;
+        $grandchildren = $currentcat->get_children();
+        if (!empty($grandchildren)) {
+            $queue = array_merge($queue, $grandchildren);
+        }
+    }
+    return $descendantids;
+}
+
+function local_categoryfields_get_category_path_name(\core_course_category $category, int $excludetreerootid = 0): string {
+    global $DB;
+    $parentids = $category->get_parents();
+    if ($excludetreerootid > 0) {
+        $key = array_search($excludetreerootid, $parentids);
+        if ($key !== false) {
+            $parentids = array_slice($parentids, $key + 1);
+        } else if ($category->id == $excludetreerootid) {
+            return $category->name;
+        }
+    }
+    if (empty($parentids)) {
+        return $category->name;
+    }
+    $parents = $DB->get_records_list('course_categories', 'id', $parentids);
+    $pathnames = [];
+    foreach ($parentids as $id) {
+        if (isset($parents[$id])) {
+            $pathnames[] = $parents[$id]->name;
+        }
+    }
+    $pathnames[] = $category->name;
+    return implode(' / ', $pathnames);
 }

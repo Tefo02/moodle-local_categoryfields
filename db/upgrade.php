@@ -53,5 +53,24 @@ function xmldb_local_categoryfields_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025092401, 'local', 'categoryfields');
     }
 
+    if ($oldversion < 2025092402) {
+        // Adiciona o campo 'related_categories' à tabela local_categoryfields_data.
+        $table = new xmldb_table('local_categoryfields_data');
+        $field = new xmldb_field('related_categories', XMLDB_TYPE_TEXT, 'small', null, XMLDB_NOTNULL, false, '', 'image');
+
+        // Adiciona a nova coluna se ela não existir.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Ponto de salvamento da atualização.
+        upgrade_plugin_savepoint(true, 2025092402, 'local', 'categoryfields');
+    }
+
+    if ($oldversion < 2025093006) {
+        // No database changes for this version, just a savepoint.
+        upgrade_plugin_savepoint(true, 2025093006, 'local', 'categoryfields');
+    }
+
     return true;
 }
