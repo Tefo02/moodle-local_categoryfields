@@ -21,24 +21,19 @@ function xmldb_local_categoryfields_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2025092400) {
-        // 1. Define a nova coluna para o itemid do arquivo.
         $table = new xmldb_table('local_categoryfields_data');
         $field = new xmldb_field('image', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, false, '0', 'summary');
 
-        // 2. Adiciona a nova coluna.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        // 3. Define a coluna antiga que será removida.
         $fieldtodrop = new xmldb_field('imageurl');
 
-        // 4. Remove a coluna antiga.
         if ($dbman->field_exists($table, $fieldtodrop)) {
             $dbman->drop_field($table, $fieldtodrop);
         }
 
-        // Ponto de salvamento da atualização.
         upgrade_plugin_savepoint(true, 2025092400, 'local', 'categoryfields');
     }
 
@@ -54,21 +49,17 @@ function xmldb_local_categoryfields_upgrade($oldversion) {
     }
 
     if ($oldversion < 2025092402) {
-        // Adiciona o campo 'related_categories' à tabela local_categoryfields_data.
         $table = new xmldb_table('local_categoryfields_data');
         $field = new xmldb_field('related_categories', XMLDB_TYPE_TEXT, 'small', null, XMLDB_NOTNULL, false, '', 'image');
 
-        // Adiciona a nova coluna se ela não existir.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        // Ponto de salvamento da atualização.
         upgrade_plugin_savepoint(true, 2025092402, 'local', 'categoryfields');
     }
 
     if ($oldversion < 2025093006) {
-        // No database changes for this version, just a savepoint.
         upgrade_plugin_savepoint(true, 2025093006, 'local', 'categoryfields');
     }
 

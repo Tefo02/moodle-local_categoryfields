@@ -74,6 +74,8 @@ if ($mform->is_cancelled()) {
         ['subdirs' => 0, 'maxfiles' => 1]
     );
 
+    
+
     redirect(new moodle_url('/course/management.php', ['categoryid' => $categoryid]), get_string('changessaved', 'local_categoryfields'), \core\output\notification::NOTIFY_SUCCESS);
 }
 
