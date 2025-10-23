@@ -72,6 +72,17 @@ class edit_category_fields_form extends \moodleform {
         $mform->addElement('hidden', 'categoryid', $categoryid);
         $mform->setType('categoryid', PARAM_INT);
 
+        $mform->addElement(
+            'advcheckbox', 
+            'is_program', 
+            get_string('is_program', 'local_categoryfields'), 
+            get_string('is_program_desc', 'local_categoryfields'),
+            null,
+            [0, 1]
+        );
+        $mform->setDefault('is_program', 0);
+        $mform->setType('is_program', PARAM_BOOL);
+
         $this->add_action_buttons();
     }
 }

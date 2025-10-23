@@ -13,5 +13,10 @@
         <KEY NAME="categoryid_uk" TYPE="unique" FIELDS="categoryid"/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="local_categoryfields_data" COMMENT="Stores custom data for course categories">
+    <FIELDS>
+        <FIELD NAME="is_program" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Boolean flag: 1 if this category is a main program"/>
+    </FIELDS>
+    </TABLE>
   </TABLES>
 </XMLDB>

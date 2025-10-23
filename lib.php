@@ -20,7 +20,7 @@ require_once($CFG->libdir . '/formslib.php');
 
 require_once(__DIR__ . '/lib.php');
 require_once(__DIR__ . '/classes/form/edit_category_fields_form.php');
-
+    
 function local_categoryfields_extend_navigation_category_settings(navigation_node $parentnode, context_coursecat $context) {
     if (!has_capability('moodle/category:manage', $context)) {
         return;
@@ -75,6 +75,7 @@ function local_categoryfields_pluginfile($course, $cm, $context, $filearea, $arg
     }
 
     send_stored_file($file, 0, 0, $forcedownload, $options);
+    return true;
 }
 
 
@@ -182,8 +183,8 @@ function local_categoryfields_course_list_dynamic_fields(string $context): array
  * @return mixed
  */
 function local_categoryfields_course_list_dynamic_field_value(
-    stdClass $course, 
-    string $fieldname, 
+    stdClass $course,
+    string $fieldname,
     string $context
 ) {
     global $DB;
@@ -192,40 +193,29 @@ function local_categoryfields_course_list_dynamic_field_value(
         return null;
     }
 
-    $course_category = core_course_category::get($course->category, IGNORE_MISSING);
+    $course_category = \core_course_category::get($course->category, IGNORE_MISSING);
     if (!$course_category) {
         return null;
     }
 
-    // 2. Obtém todos os pais dessa categoria (ex: "Módulo 1" -> "Ciência da Computação")
-    // O método get_parent_categories() retorna um array de stdClass [id => obj]
-    $parent_categories = $course_category->get_parent_categories();
-    // Precisamos incluir a própria categoria do curso na verificação? 
-    // Provavelmente não, mas se sim: $parent_categories[$course_category->id] = $course_category;
-    
-    if (empty($parent_categories)) {
+    $parent_ids = $course_category->get_parents();
+
+    if (empty($parent_ids)) {
         return null;
     }
 
-    $parent_ids = array_keys($parent_categories);
-
-    // 3. Verifica qual desses pais está marcado como 'is_program'
-    // Esta SQL assume que sua tabela se chama {local_categoryfields_data}
-    // e os campos são {categoryid} e {is_program}.
-    // **AJUSTE OS NOMES DA TABELA E CAMPO CONFORME SUA IMPLEMENTAÇÃO**
     $sql = "SELECT c.id, c.name
             FROM {course_categories} c
             JOIN {local_categoryfields_data} lcf ON c.id = lcf.categoryid
             WHERE c.id IN (" . implode(',', $parent_ids) . ")
               AND lcf.is_program = 1
-            ORDER BY c.depth ASC"; // Pega o "Programa" de nível mais alto
+            ORDER BY c.depth ASC";
 
     $program_cat = $DB->get_record_sql($sql);
 
     if ($program_cat) {
-        // Sucesso! Injeta um objeto com os dados do programa.
         return ['id' => (int)$program_cat->id, 'name' => $program_cat->name];
     }
 
-    return null; // Este curso não pertence a um programa
+    return null;
 }

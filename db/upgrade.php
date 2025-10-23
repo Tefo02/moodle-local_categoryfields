@@ -63,5 +63,18 @@ function xmldb_local_categoryfields_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025093006, 'local', 'categoryfields');
     }
 
+    if ($oldversion < 2025102200) { 
+
+        $table = new xmldb_table('local_categoryfields_data');
+
+        $field = new xmldb_field('is_program', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, false, '0', 'related_categories'); 
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2025102200, 'local', 'categoryfields'); // Use a nova versão aqui
+    }
+
     return true;
 }

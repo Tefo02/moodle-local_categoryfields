@@ -43,6 +43,7 @@ $formdata = new stdClass();
 if ($record) {
     $formdata->id = $record->id;
     $formdata->related_categories = !empty($record->related_categories) ? explode(',', $record->related_categories) : [];
+    $formdata->is_program = $record->is_program; // <-- LINHA 1 ADICIONADA
 }
 $formdata->image_manager = $draftitemid;
 
@@ -56,6 +57,7 @@ if ($mform->is_cancelled()) {
     $rec = new stdClass();
     $rec->categoryid = $categoryid;
     $rec->related_categories = !empty($data->related_categories) ? implode(',', $data->related_categories) : '';
+    $rec->is_program = $data->is_program; // <-- LINHA 2 ADICIONADA
 
     if ($record) {
         $rec->id = $record->id;

@@ -33,3 +33,7 @@ $string['pluginname'] = 'Category Fields';
 
 $string['relatedcategories'] = 'Related Categories';
 
+$string['is_program'] = 'Is a program?';
+$string['is_program_desc'] = 'Check this if the category represents a main program (e.g., "Computer Science") and should be used to group courses on the "My Courses" page.';
+
+$string['local_categoryfields_get_my_courses_with_programs:description'] = 'Gets user courses with injected program data.';
